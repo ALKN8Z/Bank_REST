@@ -1,0 +1,177 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1755077446456-1
+      author: Knyazev Alexander
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  autoIncrement: true
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: pk_t_card
+                  name: id
+                  type: BIGINT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: number
+                  type: VARCHAR(255)
+              - column:
+                  name: owner_id
+                  type: BIGINT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: expiry_date
+                  type: DATETIME
+              - column:
+                  constraints:
+                    nullable: false
+                  name: balance
+                  type: DECIMAL
+              - column:
+                  constraints:
+                    nullable: false
+                  name: status
+                  type: VARCHAR(255)
+            tableName: t_card
+            ifNotExists: true
+  - changeSet:
+      id: 1755077446456-2
+      author: Knyazev Alexander
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  autoIncrement: true
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: pk_t_transfer
+                  name: id
+                  type: BIGINT
+              - column:
+                  name: from_card_id
+                  type: BIGINT
+              - column:
+                  name: to_card_id
+                  type: BIGINT
+              - column:
+                  name: owner_id
+                  type: BIGINT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: amount
+                  type: DECIMAL
+              - column:
+                  constraints:
+                    nullable: false
+                  name: created_at
+                  type: DATETIME
+              - column:
+                  constraints:
+                    nullable: false
+                  name: status
+                  type: VARCHAR(255)
+            tableName: t_transfer
+            ifNotExists: true
+  - changeSet:
+      id: 1755077446456-3
+      author: Knyazev Alexander
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  autoIncrement: true
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: pk_t_user
+                  name: id
+                  type: BIGINT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: username
+                  type: VARCHAR(255)
+              - column:
+                  constraints:
+                    nullable: false
+                  name: password
+                  type: VARCHAR(255)
+              - column:
+                  constraints:
+                    nullable: false
+                  name: role
+                  type: VARCHAR(255)
+            tableName: t_user
+            ifNotExists: true
+  - changeSet:
+      id: 1755077446456-4
+      author: Knyazev Alexander
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addUniqueConstraint:
+            columnNames: number
+            constraintName: uc_t_card_number
+            tableName: t_card
+  - changeSet:
+      id: 1755077446456-5
+      author: Knyazev Alexander
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addUniqueConstraint:
+            columnNames: username
+            constraintName: uc_t_user_username
+            tableName: t_user
+  - changeSet:
+      id: 1755077446456-6
+      author: Knyazev Alexander
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: owner_id
+            baseTableName: t_card
+            constraintName: FK_T_CARD_ON_OWNER
+            referencedColumnNames: id
+            referencedTableName: t_user
+  - changeSet:
+      id: 1755077446456-7
+      author: Knyazev Alexander
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: from_card_id
+            baseTableName: t_transfer
+            constraintName: FK_T_TRANSFER_ON_FROM_CARD
+            referencedColumnNames: id
+            referencedTableName: t_card
+  - changeSet:
+      id: 1755077446456-8
+      author: Knyazev Alexander
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: owner_id
+            baseTableName: t_transfer
+            constraintName: FK_T_TRANSFER_ON_OWNER
+            referencedColumnNames: id
+            referencedTableName: t_user
+  - changeSet:
+      id: 1755077446456-9
+      author: Knyazev Alexander
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: to_card_id
+            baseTableName: t_transfer
+            constraintName: FK_T_TRANSFER_ON_TO_CARD
+            referencedColumnNames: id
+            referencedTableName: t_card
+
