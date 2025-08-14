@@ -3,6 +3,8 @@ package com.example.bankcards.service.impl;
 import com.example.bankcards.dto.CreateTransferRequest;
 import com.example.bankcards.dto.TransferDto;
 import com.example.bankcards.entity.*;
+import com.example.bankcards.exception.AccessToResourceDeniedException;
+import com.example.bankcards.exception.BadRequestException;
 import com.example.bankcards.exception.CardNotFoundException;
 import com.example.bankcards.exception.UserNotFoundException;
 import com.example.bankcards.repository.CardRepository;
@@ -14,7 +16,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -53,23 +54,23 @@ public class TransferServiceImpl implements TransferService {
         );
 
         if (!fromCard.getOwner().equals(currentUser) || !toCard.getOwner().equals(currentUser)) {
-            throw new AccessDeniedException("Переводы доступны только между своими картами");
+            throw new AccessToResourceDeniedException("Переводы доступны только между своими картами");
         }
 
         if (request.getAmount().compareTo(maxTransferAmount) > 0) {
-            throw new IllegalArgumentException("Максимальная сумма перевода: " + maxTransferAmount);
+            throw new BadRequestException("Максимальная сумма перевода: " + maxTransferAmount);
         }
 
         if (fromCard.getBalance().compareTo(request.getAmount()) < 0){
-            throw new IllegalArgumentException("Недостаточно средств для перевода");
+            throw new BadRequestException("Недостаточно средств для перевода");
         }
 
         if (toCard.getCardStatus() != CardStatus.ACTIVE) {
-            throw new IllegalArgumentException("Карта отправителя неактивна");
+            throw new BadRequestException("Карта отправителя неактивна");
         }
 
         if (fromCard.getCardStatus() != CardStatus.ACTIVE) {
-            throw new IllegalArgumentException("Карта получателя неактивна");
+            throw new BadRequestException("Карта получателя неактивна");
         }
 
         fromCard.setBalance(fromCard.getBalance().subtract(request.getAmount()));
