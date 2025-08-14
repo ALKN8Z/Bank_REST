@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
+    private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
     @Override
     public UserResponse getMyUserInfo() {
@@ -53,7 +55,7 @@ public class UserServiceImpl implements UserService {
             user.setUsername(request.getUsername());
         }
         if (request.getPassword() != null) {
-            user.setPassword(request.getPassword());
+            user.setPassword(bCryptPasswordEncoder.encode(request.getPassword()));
         }
         if (request.getRole() != null) {
             user.setRole(request.getRole());

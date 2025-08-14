@@ -3,6 +3,7 @@ package com.example.bankcards.service.impl;
 import com.example.bankcards.dto.AuthRequest;
 import com.example.bankcards.entity.Role;
 import com.example.bankcards.entity.User;
+import com.example.bankcards.exception.UsernameAlreadyTakenException;
 import com.example.bankcards.repository.UserRepository;
 import com.example.bankcards.security.JwtProvider;
 import com.example.bankcards.security.MyUserDetails;
@@ -43,7 +44,7 @@ public class AuthServiceImpl implements AuthService {
     @Transactional
     public String register(AuthRequest authRequest) {
         if (userRepository.existsUserByUsername(authRequest.getUsername())) {
-            throw new IllegalArgumentException("Данное имя пользователя уже занято");
+            throw new UsernameAlreadyTakenException("Данное имя пользователя уже занято");
         }
         else{
             User newUser = User.builder()

@@ -2,6 +2,9 @@ package com.example.bankcards.security;
 
 
 import com.example.bankcards.entity.User;
+import com.example.bankcards.exception.JwtValidationException;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
@@ -54,13 +57,18 @@ public class JwtProvider {
                 .getSubject();
     }
 
-    public boolean validateToken(String token) {
+    public void validateToken(String token) throws JwtValidationException {
         try {
-            Jwts.parserBuilder().setSigningKey(key).requireIssuer(issuer).build().parseClaimsJws(token);
-            return true;
+            Jwts.parserBuilder()
+                    .setSigningKey(key)
+                    .requireIssuer(issuer)
+                    .build()
+                    .parseClaimsJws(token);
+        } catch (ExpiredJwtException e) {
+            throw new JwtValidationException("JWT токен просрочен ");
+        } catch (JwtException e){
+            throw new JwtValidationException("JWT токен невалиден");
         }
-        catch (Exception e) {
-            return false;
-        }
+
     }
 }

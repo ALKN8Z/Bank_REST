@@ -80,7 +80,7 @@ public class CardController {
     @PatchMapping("/{cardId}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<CardDto> updateCard(@PathVariable(name = "cardId") Long cardId,
-                                              @Valid @RequestBody UpdateCardRequest request) {
+                                              @RequestBody @Valid UpdateCardRequest request) {
         return ResponseEntity.ok(cardService.updateCard(request, cardId));
     }
 

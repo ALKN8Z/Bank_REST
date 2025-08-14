@@ -7,6 +7,7 @@ import com.example.bankcards.entity.Card;
 import com.example.bankcards.entity.CardStatus;
 import com.example.bankcards.entity.Role;
 import com.example.bankcards.entity.User;
+import com.example.bankcards.exception.AccessToResourceDeniedException;
 import com.example.bankcards.exception.CardNotFoundException;
 import com.example.bankcards.exception.UserNotFoundException;
 import com.example.bankcards.repository.CardRepository;
@@ -119,7 +120,7 @@ public class CardServiceImpl implements CardService {
         );
 
         if (!card.getOwner().getUsername().equals(ownerUsername)) {
-            throw new AccessDeniedException("Вы не имеете доступа к этой карте");
+            throw new AccessToResourceDeniedException("Вы не имеете доступа к этой карте");
         }
         card.setCardStatus(CardStatus.BLOCKED);
         return cardMapper.toCardDto(cardRepository.save(card));
@@ -163,8 +164,8 @@ public class CardServiceImpl implements CardService {
                 () -> new UserNotFoundException("Пользователь с именем" + username + " не найден")
         );
 
-        if (!user.getRole().equals(Role.ADMIN) || !username.equals(card.getOwner().getUsername())) {
-            throw new AccessDeniedException("Вы не имеете доступа к этой карте");
+        if (!user.getRole().equals(Role.ADMIN) && !username.equals(card.getOwner().getUsername())) {
+            throw new AccessToResourceDeniedException("Вы не имеете доступа к этой карте");
         }
     }
 }

@@ -23,7 +23,7 @@ public class TransferController {
     private final TransferService transferService;
 
     @PostMapping()
-    public ResponseEntity<TransferDto> transfer(@Valid @RequestBody CreateTransferRequest request) {
+    public ResponseEntity<TransferDto> transfer(@RequestBody @Valid CreateTransferRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(transferService.createTransfer(request));
     }
 
