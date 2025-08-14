@@ -1,1 +1,981 @@
-# Здесь будет OpenAPI описание всех доступных эндпоинтов и моделей данных.
+openapi: 3.0.1
+info:
+  title: Bank_REST API
+  description: "API для управления картами, пользователями и переводами"
+  contact:
+    name: Knyazev Alexander
+    email: siferop@gmail.com
+  license:
+    name: API License
+    url: https://example.com/licenses
+  version: "1.0"
+servers:
+  - url: http://localhost:8080
+    description: Generated server url
+security:
+  - Bearer Authentication: []
+tags:
+  - name: Пользователи
+    description: Методы для работы с информацией о пользователях
+  - name: Карты
+    description: Методы управления банковскими картами
+  - name: Переводы
+    description: Методы для создания и получения переводов
+  - name: Аутентификация
+    description: Методы для входа и регистрации пользователей
+paths:
+  /api/transfers:
+    post:
+      tags:
+        - Переводы
+      summary: Создать перевод
+      description: Создает новый перевод между картами. Пользователь должен быть авторизован.
+      operationId: transfer
+      requestBody:
+        description: Данные для создания перевода
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateTransferRequest"
+        required: true
+      responses:
+        "201":
+          description: Перевод успешно создан
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/TransferDto"
+        "400":
+          description: Некорректные данные перевода
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/TransferDto"
+        "401":
+          description: Пользователь не авторизован
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/TransferDto"
+        "403":
+          description: Нет доступа для выполнения перевода
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/TransferDto"
+  /api/cards:
+    post:
+      tags:
+        - Карты
+      summary: Создать карту
+      description: Создает новую банковскую карту. Доступно только для администратора.
+      operationId: createCard
+      requestBody:
+        description: Данные для создания карты
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCardRequest"
+        required: true
+      responses:
+        "201":
+          description: Карта успешно создана
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/CardDto"
+        "400":
+          description: Некорректные данные запроса
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/CardDto"
+  /api/auth/register:
+    post:
+      tags:
+        - Аутентификация
+      summary: Регистрация нового пользователя
+      description: Создает нового пользователя и возвращает JWT токен. Токен также
+        добавляется в заголовок `Authorization`.
+      operationId: register
+      requestBody:
+        description: Данные для регистрации (логин и пароль)
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AuthRequest"
+        required: true
+      responses:
+        "200":
+          description: Пользователь успешно зарегистрирован
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "400":
+          description: Некорректные данные регистрации или пользователь уже существует
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+  /api/auth/login:
+    post:
+      tags:
+        - Аутентификация
+      summary: Вход в систему
+      description: Авторизует пользователя и возвращает JWT токен. Токен также добавляется
+        в заголовок `Authorization`.
+      operationId: login
+      requestBody:
+        description: Данные для входа (логин и пароль)
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AuthRequest"
+        required: true
+      responses:
+        "200":
+          description: Успешная авторизация
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "401":
+          description: Неверный логин или пароль
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+  /api/users/{userId}:
+    get:
+      tags:
+        - Пользователи
+      summary: Получить информацию о пользователе по ID
+      description: Возвращает данные о пользователе по его идентификатору. Доступно
+        только для администраторов.
+      operationId: getUser
+      parameters:
+        - name: userId
+          in: path
+          description: ID пользователя
+          required: true
+          schema:
+            type: integer
+            format: int64
+          example: 5
+      responses:
+        "200":
+          description: Информация о пользователе
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+        "404":
+          description: Пользователь не найден
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+        "403":
+          description: Нет прав доступа
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+    delete:
+      tags:
+        - Пользователи
+      summary: Удалить пользователя
+      description: Удаляет пользователя по его идентификатору. Доступно только для
+        администраторов.
+      operationId: deleteUser
+      parameters:
+        - name: userId
+          in: path
+          description: ID пользователя
+          required: true
+          schema:
+            type: integer
+            format: int64
+          example: 9
+      responses:
+        "204":
+          description: Пользователь успешно удалён
+        "404":
+          description: Пользователь не найден
+        "403":
+          description: Нет прав доступа
+    patch:
+      tags:
+        - Пользователи
+      summary: Обновить данные пользователя
+      description: Обновляет данные пользователя по его идентификатору. Доступно только
+        для администраторов.
+      operationId: updateUser
+      parameters:
+        - name: userId
+          in: path
+          description: ID пользователя
+          required: true
+          schema:
+            type: integer
+            format: int64
+          example: 1
+      requestBody:
+        description: Данные для обновления пользователя
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserUpdateDto"
+        required: true
+      responses:
+        "200":
+          description: Пользователь успешно обновлён
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+        "400":
+          description: Некорректные данные запроса
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+        "404":
+          description: Пользователь не найден
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+        "403":
+          description: Нет прав доступа
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+  /api/cards/{cardId}:
+    get:
+      tags:
+        - Карты
+      summary: Получить карту по ID
+      description: Возвращает информацию о карте по её идентификатору.
+      operationId: getCard
+      parameters:
+        - name: cardId
+          in: path
+          description: ID карты
+          required: true
+          schema:
+            type: integer
+            format: int64
+          example: 10
+      responses:
+        "200":
+          description: Карта найдена
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/CardDto"
+        "404":
+          description: Карта не найдена
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/CardDto"
+    delete:
+      tags:
+        - Карты
+      summary: Удалить карту
+      description: Удаляет карту по её идентификатору. Доступно только для администратора.
+      operationId: deleteCard
+      parameters:
+        - name: cardId
+          in: path
+          description: ID карты
+          required: true
+          schema:
+            type: integer
+            format: int64
+          example: 9
+      responses:
+        "200":
+          description: OK
+    patch:
+      tags:
+        - Карты
+      summary: Обновить карту
+      description: Обновляет данные карты. Доступно только для администратора.
+      operationId: updateCard
+      parameters:
+        - name: cardId
+          in: path
+          description: ID карты
+          required: true
+          schema:
+            type: integer
+            format: int64
+          example: 7
+      requestBody:
+        description: Данные для обновления карты
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateCardRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/CardDto"
+  /api/cards/{cardId}/block:
+    patch:
+      tags:
+        - Карты
+      summary: Заблокировать карту
+      description: Блокирует карту пользователя.
+      operationId: blockCard
+      parameters:
+        - name: cardId
+          in: path
+          description: ID карты
+          required: true
+          schema:
+            type: integer
+            format: int64
+          example: 12
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/CardDto"
+  /api/users:
+    get:
+      tags:
+        - Пользователи
+      summary: Получить список всех пользователей
+      description: Возвращает постраничный список всех пользователей. Доступно только
+        для администраторов.
+      operationId: getAllUsers
+      parameters:
+        - name: arg0
+          in: query
+          required: true
+          schema:
+            $ref: "#/components/schemas/Pageable"
+      responses:
+        "200":
+          description: Список пользователей
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/Page"
+        "403":
+          description: Нет прав доступа
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/PageUserResponse"
+  /api/users/my-info:
+    get:
+      tags:
+        - Пользователи
+      summary: Получить информацию о текущем пользователе
+      description: "Возвращает данные о пользователе, который сделал запрос. Требу\
+        ется авторизация."
+      operationId: getMyUserInfo
+      responses:
+        "200":
+          description: Информация о пользователе
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+        "401":
+          description: Пользователь не авторизован
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+  /api/transfers/my:
+    get:
+      tags:
+        - Переводы
+      summary: Получить мои переводы
+      description: "Возвращает постраничный список переводов, которые совершил авт\
+        оризованный пользователь."
+      operationId: getMyTransfers
+      parameters:
+        - name: arg0
+          in: query
+          required: true
+          schema:
+            $ref: "#/components/schemas/Pageable"
+      responses:
+        "200":
+          description: Список переводов пользователя
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/Page"
+        "401":
+          description: Пользователь не авторизован
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/PageTransferDto"
+  /api/transfers/all:
+    get:
+      tags:
+        - Переводы
+      summary: Получить все переводы (только для администратора)
+      description: Возвращает постраничный список всех переводов в системе. Доступно
+        только для пользователей с ролью ADMIN.
+      operationId: getAllTransfers
+      parameters:
+        - name: arg0
+          in: query
+          required: true
+          schema:
+            $ref: "#/components/schemas/Pageable"
+      responses:
+        "200":
+          description: Список переводов
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/Page"
+        "403":
+          description: Нет прав доступа
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/PageTransferDto"
+  /api/cards/{cardId}/balance:
+    get:
+      tags:
+        - Карты
+      summary: Получить баланс карты
+      description: Возвращает текущий баланс по карте.
+      operationId: getCardBalance
+      parameters:
+        - name: cardId
+          in: path
+          description: ID карты
+          required: true
+          schema:
+            type: integer
+            format: int64
+          example: 15
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: number
+  /api/cards/my:
+    get:
+      tags:
+        - Карты
+      summary: Получить свои карты
+      description: Возвращает постраничный список карт текущего пользователя.
+      operationId: getMyCards
+      parameters:
+        - name: arg0
+          in: query
+          required: true
+          schema:
+            $ref: "#/components/schemas/Pageable"
+        - name: status
+          in: query
+          description: Статус карты
+          required: false
+          schema:
+            type: string
+          example: BLOCKED
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/PageCardDto"
+  /api/cards/all:
+    get:
+      tags:
+        - Карты
+      summary: Получить список всех карт
+      description: Возвращает постраничный список карт. Доступно только для администратора.
+      operationId: getAllCards
+      parameters:
+        - name: arg0
+          in: query
+          required: true
+          schema:
+            $ref: "#/components/schemas/Pageable"
+        - name: status
+          in: query
+          description: Статус карты
+          required: false
+          schema:
+            type: string
+          example: ACTIVE
+        - name: username
+          in: query
+          description: Имя владельца карты
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/PageCardDto"
+components:
+  schemas:
+    CardResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Уникальный идентификатор карты
+          format: int64
+          example: 1
+        number:
+          type: string
+          description: Номер карты в формате **** **** **** ****
+          example: 1234 5678 9012 3456
+        expiryDate:
+          type: string
+          description: Дата истечения срока действия карты
+          format: date-time
+        balance:
+          type: number
+          description: Текущий баланс карты
+          example: 1500.75
+        cardStatus:
+          type: string
+          description: Статус карты
+          example: ACTIVE
+          enum:
+            - ACTIVE
+            - BLOCKED
+            - EXPIRED
+      description: Ответ с информацией о карте
+    TransferDto:
+      required:
+        - amount
+        - createdAt
+        - fromCard
+        - owner
+        - toCard
+        - transferStatus
+      type: object
+      properties:
+        fromCard:
+          $ref: "#/components/schemas/CardResponse"
+        toCard:
+          $ref: "#/components/schemas/CardResponse"
+        owner:
+          $ref: "#/components/schemas/UserDto"
+        amount:
+          type: number
+          description: Сумма перевода
+          example: 1500.5
+        createdAt:
+          type: string
+          description: Дата и время создания перевода
+          format: date-time
+        transferStatus:
+          type: string
+          description: Статус перевода
+          example: COMPLETED
+          enum:
+            - COMPLETED
+            - IN_PROGRESS
+            - REJECTED
+      description: DTO для информации о переводе между картами
+    UserDto:
+      required:
+        - id
+        - password
+        - username
+      type: object
+      properties:
+        id:
+          type: integer
+          description: ID пользователя
+          format: int64
+          example: 1
+        username:
+          type: string
+          description: Имя пользователя
+          example: ALKN8Z
+        password:
+          type: string
+          description: Пароль пользователя
+          example: password123
+      description: DTO пользователя
+    CreateTransferRequest:
+      required:
+        - amount
+        - fromCardId
+        - toCardId
+      type: object
+      properties:
+        fromCardId:
+          type: integer
+          description: ID карты отправителя
+          format: int64
+          example: 1
+        toCardId:
+          type: integer
+          description: ID карты получателя
+          format: int64
+          example: 2
+        amount:
+          type: number
+          description: Сумма перевода
+          example: 500.75
+      description: Запрос на создание перевода между картами
+    CardDto:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Уникальный идентификатор карты
+          format: int64
+          example: 1
+        number:
+          type: string
+          description: Номер карты в формате **** **** **** ****
+          example: 1234 5678 9012 3456
+        ownerUsername:
+          type: string
+          description: "Имя пользователя, которому принадлежит карта"
+          example: ALKN8Z
+        expiryDate:
+          type: string
+          description: Дата истечения срока действия карты
+          format: date-time
+        balance:
+          type: number
+          description: Текущий баланс карты
+          example: 1500.75
+        cardStatus:
+          type: string
+          description: Статус карты
+          example: ACTIVE
+          enum:
+            - ACTIVE
+            - BLOCKED
+            - EXPIRED
+      description: Информация о банковской карте
+    CreateCardRequest:
+      required:
+        - balance
+        - ownerId
+      type: object
+      properties:
+        ownerId:
+          type: integer
+          description: Идентификатор владельца карты
+          format: int64
+          example: 1
+        balance:
+          type: number
+          description: Начальный баланс карты
+          example: 1000.5
+      description: Запрос на создание новой карты
+    AuthResponse:
+      type: object
+      properties:
+        token:
+          type: string
+          description: "JWT токен, используемый для авторизации последующих запрос\
+            ов"
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+      description: Ответ с JWT токеном после успешной аутентификации или регистрации
+    AuthRequest:
+      required:
+        - password
+        - username
+      type: object
+      properties:
+        username:
+          type: string
+          description: Имя пользователя для входа в систему
+          example: ALKN8Z
+        password:
+          type: string
+          description: Пароль пользователя
+          example: P@ssw0rd123
+      description: Запрос на аутентификацию пользователя
+    UserResponse:
+      required:
+        - id
+        - password
+        - role
+        - username
+      type: object
+      properties:
+        id:
+          type: integer
+          description: ID пользователя
+          format: int64
+          example: 1
+        username:
+          type: string
+          description: Имя пользователя
+          example: ALKN8Z
+        password:
+          type: string
+          description: Пароль пользователя (закодированный)
+          example: hashed_password123
+        role:
+          type: string
+          description: Роль пользователя
+          example: ADMIN
+          enum:
+            - ADMIN
+            - USER
+        cards:
+          uniqueItems: true
+          type: array
+          description: Список карт пользователя
+          items:
+            $ref: "#/components/schemas/CardResponse"
+      description: Ответ с информацией о пользователе
+    UserUpdateDto:
+      type: object
+      properties:
+        username:
+          type: string
+          description: Новое имя пользователя
+          example: new_john_doe
+        password:
+          type: string
+          description: Новый пароль пользователя
+          example: new_secure_password
+        role:
+          type: string
+          description: Новая роль пользователя
+          example: USER
+          enum:
+            - ADMIN
+            - USER
+      description: DTO для обновления информации о пользователе
+    UpdateCardRequest:
+      required:
+        - cardStatus
+        - expiryDate
+      type: object
+      properties:
+        expiryDate:
+          type: string
+          description: Новый срок действия карты
+          format: date-time
+        cardStatus:
+          type: string
+          description: Новый статус карты
+          example: ACTIVE
+          enum:
+            - ACTIVE
+            - BLOCKED
+            - EXPIRED
+      description: DTO для обновления информации о карте
+    Page:
+      type: object
+      properties:
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+          format: int32
+        size:
+          type: integer
+          format: int32
+        content:
+          type: array
+          items:
+            type: object
+        number:
+          type: integer
+          format: int32
+        sort:
+          type: array
+          items:
+            $ref: "#/components/schemas/SortObject"
+        first:
+          type: boolean
+        last:
+          type: boolean
+        numberOfElements:
+          type: integer
+          format: int32
+        pageable:
+          $ref: "#/components/schemas/PageableObject"
+        empty:
+          type: boolean
+    PageableObject:
+      type: object
+      properties:
+        offset:
+          type: integer
+          format: int64
+        sort:
+          type: array
+          items:
+            $ref: "#/components/schemas/SortObject"
+        pageSize:
+          type: integer
+          format: int32
+        pageNumber:
+          type: integer
+          format: int32
+        paged:
+          type: boolean
+        unpaged:
+          type: boolean
+    SortObject:
+      type: object
+      properties:
+        direction:
+          type: string
+        nullHandling:
+          type: string
+        ascending:
+          type: boolean
+        property:
+          type: string
+        ignoreCase:
+          type: boolean
+    Pageable:
+      type: object
+      properties:
+        page:
+          minimum: 0
+          type: integer
+          format: int32
+        size:
+          minimum: 1
+          type: integer
+          format: int32
+        sort:
+          type: array
+          items:
+            type: string
+    PageUserResponse:
+      type: object
+      properties:
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+          format: int32
+        size:
+          type: integer
+          format: int32
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/UserResponse"
+        number:
+          type: integer
+          format: int32
+        sort:
+          type: array
+          items:
+            $ref: "#/components/schemas/SortObject"
+        first:
+          type: boolean
+        last:
+          type: boolean
+        numberOfElements:
+          type: integer
+          format: int32
+        pageable:
+          $ref: "#/components/schemas/PageableObject"
+        empty:
+          type: boolean
+    PageTransferDto:
+      type: object
+      properties:
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+          format: int32
+        size:
+          type: integer
+          format: int32
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/TransferDto"
+        number:
+          type: integer
+          format: int32
+        sort:
+          type: array
+          items:
+            $ref: "#/components/schemas/SortObject"
+        first:
+          type: boolean
+        last:
+          type: boolean
+        numberOfElements:
+          type: integer
+          format: int32
+        pageable:
+          $ref: "#/components/schemas/PageableObject"
+        empty:
+          type: boolean
+    PageCardDto:
+      type: object
+      properties:
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+          format: int32
+        size:
+          type: integer
+          format: int32
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/CardDto"
+        number:
+          type: integer
+          format: int32
+        sort:
+          type: array
+          items:
+            $ref: "#/components/schemas/SortObject"
+        first:
+          type: boolean
+        last:
+          type: boolean
+        numberOfElements:
+          type: integer
+          format: int32
+        pageable:
+          $ref: "#/components/schemas/PageableObject"
+        empty:
+          type: boolean
+  securitySchemes:
+    Bearer Authentication:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
