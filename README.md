@@ -24,7 +24,7 @@ Bank REST Application – это сервис для управления бан
 1. Клонировать репозиторий:
 
 ```bash
-git clone ALKN8Z/Bank_REST
+  git clone https://github.com/ALKN8Z/Bank_REST.git
 ```
 
 2. Запустить приложение и базу данных через Docker Compose:
