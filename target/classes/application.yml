@@ -1,14 +1,12 @@
-#
-# application.yml — главный конфигурационный файл Spring Boot.
 app:
   security:
-    secret-key: BankRestAppSecretKey1234
+    secret-key: ${APP_SECRET_KEY:BankRestAppSecretKey1234}
     algorithm: AES
     card-expiration-years: 5
     max-transfer-amount: 500000
 
 jwt:
-  secret: gh23hj45f3g2h45f234hfg5235hj2ya23jhh
+  secret: ${JWT_SECRET:defaultSecret}
   expiresIn: 3600000
   issuer: bank-rest-app
 
@@ -16,9 +14,9 @@ spring:
   application:
     name: bank-rest-application
   datasource:
-    username: postgres
-    password: postgres
-    url: jdbc:postgresql://localhost:5433/bank-rest-db
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/bank_rest_db}
+    username: ${SPRING_DATASOURCE_USERNAME:postgres}
+    password: ${SPRING_DATASOURCE_PASSWORD:postgres}
     driver-class-name: org.postgresql.Driver
   liquibase:
     change-log: classpath:/db/migration/changelog/db.changelog-master.yaml
@@ -30,3 +28,8 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         show_sql: true
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui/index.html

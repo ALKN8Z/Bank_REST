@@ -1,5 +1,3 @@
-#
-# application.yml — главный конфигурационный файл Spring Boot.
 app:
   security:
     secret-key: BankRestAppSecretKey1234
@@ -16,13 +14,12 @@ spring:
   application:
     name: bank-rest-application
   datasource:
-    username: postgres
-    password: postgres
-    url: jdbc:postgresql://localhost:5433/bank-rest-db
+    url: jdbc:postgresql://db:5432/bank_rest_db
+    username: bank-rest
+    password: bank-rest-password
     driver-class-name: org.postgresql.Driver
   liquibase:
     change-log: classpath:/db/migration/changelog/db.changelog-master.yaml
-
   jpa:
     hibernate:
       ddl-auto: validate
@@ -30,3 +27,9 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         show_sql: true
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui/index.html
